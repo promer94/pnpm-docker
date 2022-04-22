@@ -10,12 +10,18 @@ RUN pnpm fetch --prod
 FROM node:16-alpine AS builder
 WORKDIR /app
 
-COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
-COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ./turbo.json ./turbo.json
-COPY ./packages ./packages
-COPY ./apps/nextjs ./apps/nextjs
+
+#COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
+#COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
+#COPY ./turbo.json ./turbo.json
+#COPY ./packages ./packages
+#COPY ./apps/nextjs ./apps/nextjs
+#COPY ./package.json ./package.json
+
+# have to copy the whole workspace
+COPY . .
 COPY --from=deps /app/node_modules ./node_modules
+
 
 RUN corepack enable
 # https://pnpm.io/cli/install#--prod--p
@@ -33,7 +39,7 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder ./apps/nextjs ./apps/nextjs
+COPY --from=builder /app/apps/nextjs ./apps/nextjs
 
 USER nextjs
 
